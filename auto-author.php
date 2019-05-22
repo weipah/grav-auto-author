@@ -35,11 +35,12 @@ class AutoAuthorPlugin extends Plugin
      */
      public function onAdminCreatePageFrontmatter(Event $event)
      {
-        $grav = Grav::Instance();
-        $loggedInUser = $grav['user'];
+        $loggedInUser = $this->grav['user'];
 
         $header = $event['header'];
         if (!isset($header['author'])) {
+            if ($this->config->get('plugins.auto-author.user')) {
+                // use logged in user
                 $header['author']['username'] = $loggedInUser['username'];
                 $header['author']['name'] = $loggedInUser['fullname'];
                 if (is_array($loggedInUser['avatar']) && count($loggedInUser['avatar']) == 1) {
@@ -48,6 +49,10 @@ class AutoAuthorPlugin extends Plugin
                         $key = $keys[0];
                         $header['author']['avatar'] = $avatar[$key]['path'];
                 }
+            } else {
+                // use site.author from main config
+                $header['author']['name'] = $this->grav['config']->get('site.author.name');
+            }
           $event['header'] = $header;
         }
     }
