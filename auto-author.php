@@ -33,22 +33,22 @@ class AutoAuthorPlugin extends Plugin
      *
      * @param Event $event
      */
-    public function onAdminCreatePageFrontmatter(Event $event)
-    {
+     public function onAdminCreatePageFrontmatter(Event $event)
+     {
+        $grav = Grav::Instance();
+        $loggedInUser = $grav['user'];
+
         $header = $event['header'];
         if (!isset($header['author'])) {
-            if ($this->config->get('plugins.auto-author.user')) {
-                /**
-                 * @var Admin $admin
-                 */
-                $admin = $this->grav['admin'];
-                $author = $admin->user->get('fullname');
-
-            } else {
-                $author = $this->grav['config']->get('site.author.name');
-            }
-            $header['author'] = $author;
-            $event['header'] = $header;
+                $header['author']['username'] = $loggedInUser['username'];
+                $header['author']['name'] = $loggedInUser['fullname'];
+                if (is_array($loggedInUser['avatar']) && count($loggedInUser['avatar']) == 1) {
+                        $avatar = $loggedInUser['avatar'];
+                        $keys = array_keys($avatar);
+                        $key = $keys[0];
+                        $header['author']['avatar'] = $avatar[$key]['path'];
+                }
+          $event['header'] = $header;
         }
     }
 }
